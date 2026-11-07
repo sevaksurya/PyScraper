@@ -8,8 +8,13 @@ pool:
 
 variables:
 
-  dockerfilePath: '$(Build.SourcesDirectory)/Dockerfile'
-  tag: '$(Build.BuildId)'
+  - group: 'GitHub-Sync-Secrets'
+
+  - name: dockerfilePath
+    value: '$(Build.SourcesDirectory)/Dockerfile'
+  
+  - name: tag
+    value: '$(Build.BuildId)'
 
 stages:
 - stage: Build
@@ -43,3 +48,23 @@ stages:
         azureSubscription: $(azureSubscriptionConnection)
         appName: $(webAppName)
         containers: $(imageRepository):$(tag)
+
+- stage: Sync
+  displayName: 'Sync to GitHub'
+  dependsOn: Deploy
+  condition: succeeded()
+  jobs:
+  - job: SyncJob
+    steps:
+    - checkout: self
+      persistCredentials: true
+      fetchDepth: 0
+    - bash: |
+        git config --global user.email "pipeline@devops.local"
+        git config --global user.name "DevOps Pipeline"
+        
+        git remote add github https://$MAPPED_PAT@github.com/$GitHubRepo
+        git push github HEAD:refs/heads/$(Build.SourceBranchName) --force
+      displayName: 'Push Mirror to GitHub'
+      env:
+        MAPPED_PAT: $(GITHUB_PAT)        
