@@ -7,17 +7,9 @@ pool:
   vmImage: 'ubuntu-latest'
 
 variables:
-  # Names of the service connections created in Step 2
-  dockerRegistryServiceConnection: 'DockerServiceConnection'
-  azureSubscriptionConnection: 'AzureServiceConnectiom'
-  
-  # Docker Hub repository
-  imageRepository: 'imagerepository'
+
   dockerfilePath: '$(Build.SourcesDirectory)/Dockerfile'
   tag: '$(Build.BuildId)'
-  
-  # Azure Web App Name (Replace with your actual app name)
-  webAppName: 'webappname'
 
 stages:
 - stage: Build
