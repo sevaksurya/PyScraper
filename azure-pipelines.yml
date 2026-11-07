@@ -63,7 +63,7 @@ stages:
         git config --global user.email "pipeline@devops.local"
         git config --global user.name "DevOps Pipeline"
         
-        git remote add github https://$MAPPED_PAT@github.com/$GitHubRepo
+        git remote add github https://$MAPPED_PAT@github.com/$(GitHubRepo)
         git push github HEAD:refs/heads/$(Build.SourceBranchName) --force
       displayName: 'Push Mirror to GitHub'
       env:
