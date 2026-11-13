@@ -1,0 +1,18 @@
+services:
+  pyscraper:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: pyscraper
+    restart: unless-stopped
+    ports:
+      - "${PORT:-8080}:80"
+    environment:
+      - WEBSHARE_PROXY_URL=${WEBSHARE_PROXY_URL:-}
+      - PROXY_API_KEY=${PROXY_API_KEY:-}
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:80/docs')"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 5s

@@ -21,14 +21,9 @@ requests to improve compatibility with sites protected by Cloudflare.
 
 ## Requirements
 
-- Python 3.11 or newer
+- Python 3.11 or newer (for running locally without Docker)
+- Docker and Docker Compose (optional, for running in containers)
 - The dependencies listed in [`requirements.txt`](requirements.txt)
-
-Install the dependencies:
-
-```bash
-python -m pip install -r requirements.txt
-```
 
 ## Configuration
 
@@ -38,6 +33,7 @@ The service is configured with environment variables:
 |---|---|---|
 | `WEBSHARE_PROXY_URL` | Empty | Optional upstream proxy URL. |
 | `PROXY_API_KEY` | Empty | API key required in `X-API-Key`. Authentication is disabled when empty. |
+| `PORT` | `8080` | Host port used by Docker Compose mapping (`${PORT:-8080}:80`). |
 
 Example:
 
@@ -58,13 +54,92 @@ manager. Do not commit them to source control.
 
 ## Running the service
 
-Start the application with Uvicorn:
+### Option 1: Running Without Docker (Local Python)
 
-```bash
-python -m uvicorn main:app --host 127.0.0.1 --port 8080
-```
+1. **Create and activate a virtual environment (recommended):**
 
-The service is available at `http://127.0.0.1:8080`.
+   On Windows PowerShell:
+   ```powershell
+   python -m venv .venv
+   .\.venv\Scripts\Activate.ps1
+   ```
+   *(Or with Command Prompt: `.\.venv\Scripts\activate.bat`)*
+
+   On macOS / Linux:
+   ```bash
+   python3 -m venv .venv
+   source .venv/bin/activate
+   ```
+
+2. **Install dependencies:**
+   ```bash
+   python -m pip install -r requirements.txt
+   ```
+
+3. **Start the application with Uvicorn:**
+   ```bash
+   python -m uvicorn main:app --host 127.0.0.1 --port 8080 --reload
+   ```
+
+---
+
+### Option 2: Running With Docker
+
+#### Using Docker Compose (Recommended)
+
+1. **Build and start the container:**
+   ```bash
+   docker-compose up --build
+   ```
+   To run in the background (detached mode), add `-d`:
+   ```bash
+   docker-compose up -d --build
+   ```
+
+2. **(Optional) Configure environment variables with a `.env` file:**
+   Create a `.env` file in the project root:
+   ```env
+   PORT=8080
+   WEBSHARE_PROXY_URL=http://username:password@proxy-host:proxy-port
+   PROXY_API_KEY=replace-with-a-long-random-secret
+   ```
+
+3. **Stop the container:**
+   ```bash
+   docker-compose down
+   ```
+
+#### Using Docker CLI Directly
+
+1. **Build the image:**
+   ```bash
+   docker build -t pyscraper .
+   ```
+
+2. **Run the container:**
+   ```bash
+   docker run -d --name pyscraper -p 8080:80 pyscraper
+   ```
+
+   With environment variables:
+   ```bash
+   docker run -d --name pyscraper -p 8080:80 \
+     -e WEBSHARE_PROXY_URL="http://username:password@proxy-host:proxy-port" \
+     -e PROXY_API_KEY="replace-with-a-long-random-secret" \
+     pyscraper
+   ```
+
+3. **Stop and remove the container:**
+   ```bash
+   docker stop pyscraper
+   docker rm pyscraper
+   ```
+
+---
+
+### Service Verification and Documentation
+
+Once running, the service is available at `http://127.0.0.1:8080`.
 
 FastAPI provides interactive documentation at:
 
